@@ -1,22 +1,44 @@
-importar { Terminal } desde '@es-js/terminal'
+import { Terminal } from "@es-js/terminal"
+import { obtenerJson } from "https://cdn.esjs.dev/MYewdgzgLgBCBGUCmYkCcBSFwwLwwEMIBLMYNcEGAMwFczicAKWtAGwEoYBvAKBhihIsNEggAHWmKgE8MMePQE0NJFGAALFuw78YoqCDRhl8iUpWiJU6AQB0AK2xgmugL69eSAB7ijMlW44RBR0LBwPIA"
+import cryptojs from "https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/+esm"
+import { tiza } from "@es-js/tiza"
 
-asincrono funcion inicio() {
-	Terminal.limpiar()
+let CONTRASEÑA_MD5 = "396f80f656ae72b67ef5302862df6468"
 
-	Terminal.escribir('Ingresa un valor:')
+function calcularMd5(cadena) {
+  return cryptojs.MD5(String(cadena)).toString()
+}
 
-	const resultado = esperar Terminal.leer()
+async function obtenerCotizacion() {
+  const dolar = await obtenerJson('https://dolarapi.com/v1/dolares/blue')
+  const promedio = (dolar.compra + dolar.venta) / 2
 
-	Terminal.escribir({
-		Resultado: resultado,
-		Tipo: tipoDe resultado,
-	})
+  Terminal.log(tiza.fondoCian("Cotizacion del dolar blue."))
 
-	Terminal.escribir('Presiona ENTER para volver a iniciar')
+  Terminal.log(tiza.fondoRojo("Valor de compra: $" + dolar.compra))
+  Terminal.log(tiza.fondoAzul("Valor de venta: $" + dolar.venta))
+  Terminal.log(tiza.fondoVerde("Promedio entre compra y venta: $" + promedio))
+  Terminal.log(tiza.fondoAmarillo("Fecha de cotizacion: "+ dolar.fechaActualizacion))
+  Terminal.log(tiza.fondoNegro("Presione ENTER para continuar."))
 
-	esperar Terminal.leerEnter()
+  await Terminal.leerEnter()
+  obtenerCotizacion()
+}
 
-	esperar inicio()
+async function inicio() {
+  Terminal.clear()
+  Terminal.log("Ingresar contraseña:")
+  let contraseña = await Terminal.leer()
+
+  if (calcularMd5(contraseña) === CONTRASEÑA_MD5) {
+    obtenerCotizacion()
+  } else {
+    Terminal.log(tiza.fondoVerde("Contraseña incorrecta."))
+    Terminal.log(tiza.fondoNegro.blanco("Presiona ENTER para continuar."))
+
+    await Terminal.leerEnter()
+    inicio()
+  }
 }
 
 inicio()
